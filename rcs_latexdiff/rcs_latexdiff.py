@@ -257,7 +257,7 @@ EXAMPLE USAGE:
         Display the latexdiff'd PDF of the current working version of
         document.tex compared to the HEAD of the Git repository.
 
-    rcs-latexdiff document.tex master adivsor
+    rcs-latexdiff document.tex master advisor
         Display the latexdiff'd PDF of the changes in the "advisor" branch
         compared to the master branch.
 
