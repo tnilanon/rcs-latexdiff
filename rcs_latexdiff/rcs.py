@@ -1,6 +1,7 @@
 from __future__ import print_function, absolute_import
 
 import os
+import sys
 import logging
 
 from .utils import run_command
@@ -24,8 +25,12 @@ class RCS(object):
         # Use current working copy
         if commit is None:
             try:
-                with open(os.path.join(path, filename)) as f:
-                    contents = f.read()
+                if sys.version_info[0] > 2:
+                    with open(os.path.join(path, filename), encoding="utf-8") as f:
+                        contents = f.read()
+                else:
+                    with open(os.path.join(path, filename)) as f:
+                        contents = f.read()
                 logger.debug("Read contents of {}".format(os.path.join(path, filename)))
                 return contents
             except IOError:

@@ -1,5 +1,6 @@
 from __future__ import print_function, absolute_import
 
+import sys
 import subprocess
 import logging
 import re
@@ -41,8 +42,11 @@ def write_file(content, filename):
 
     """
     logger.debug("Writing content into %s" % filename)
-    if isinstance(content, unicode):
-        content = content.encode("utf-8")
+    if sys.version_info[0] > 2:
+        pass
+    else:
+        if isinstance(content, unicode):
+            content = content.encode("utf-8")
     with open(filename, 'w') as f:
         f.write(content)
 
