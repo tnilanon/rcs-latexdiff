@@ -34,7 +34,7 @@ def get_file(rcs, root_path, relative_path, commit, filename):
     logger.info("> Get file %s" % filename)
 
     # Read the file
-    file_content = rcs.show_file(root_path, commit, os.path.join(relative_path, filename))
+    file_content = rcs.show_file(root_path, commit, relative_path, filename)
 
     # Remove all latex comments
     file_content = remove_latex_comments(file_content)
@@ -290,7 +290,7 @@ EXAMPLE USAGE:
         dest='exclude_sections',
         help='Tells latexdiff to exclude diffs inside sub/section titles, which sometimes cause latex build problems.')
 
-    parser.add_argument("-r", "--repeat", 
+    parser.add_argument("-r", "--repeat",
         default=1,
         dest='repeat',
         help="Number of times to run the latex compiler.",

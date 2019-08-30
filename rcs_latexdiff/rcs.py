@@ -1,6 +1,7 @@
 from __future__ import print_function, absolute_import
 
 import os
+import posixpath
 import sys
 import logging
 
@@ -12,12 +13,13 @@ logger = logging.getLogger("rcs-latexdiff")
 class RCS(object):
     """ Revision Control System class """
 
-    def show_file(self, path, commit, filename):
+    def show_file(self, root_path, commit, relative_path, filename):
         """ Return the content of a file for a commit. If the commit is `None`,
             show the current working copy.
 
-            :param path: path of the repository
+            :param root_path: Root path of the repository
             :param commit: Commit name or `None`
+            :param relative_path: Relative path of the file
             :param filename: Name of the file
             :return: the content of the file (may be empty if the file does not exist)
 
@@ -26,16 +28,16 @@ class RCS(object):
         if commit is None:
             try:
                 if sys.version_info[0] > 2:
-                    with open(os.path.join(path, filename), encoding="utf-8") as f:
+                    with open(os.path.join(root_path, relative_path, filename), encoding="utf-8") as f:
                         contents = f.read()
                 else:
-                    with open(os.path.join(path, filename)) as f:
+                    with open(os.path.join(root_path, relative_path, filename)) as f:
                         contents = f.read()
-                logger.debug("Read contents of {}".format(os.path.join(path, filename)))
+                logger.debug("Read contents of {}".format(os.path.join(root_path, relative_path, filename)))
                 return contents
             except IOError:
-                logger.debug("Error reading working copy: {}".format(os.path.join(path, filename)))
-                raise IOError("Error reading working copy: {}".format(os.path.join(path, filename)))
+                logger.debug("Error reading working copy: {}".format(os.path.join(root_path, relative_path, filename)))
+                raise IOError("Error reading working copy: {}".format(os.path.join(root_path, relative_path, filename)))
 
     def is_valid_directory(self, path):
         """ Return wheter or not the directory is a valid RCS repository
@@ -70,15 +72,15 @@ class RCS(object):
 class Git(RCS):
     """ Git Revision Control System class """
 
-    def show_file(self, path, commit, filename):
-        
+    def show_file(self, root_path, commit, relative_path, filename):
+
         # Use current working copy
         if commit is None:
-            return super(Git, self).show_file(path, commit, filename)
-        
+            return super(Git, self).show_file(root_path, commit, relative_path, filename)
+
         # Execute 'git show' command and return content or empty string
-        git_show_command = "git show %s:%s" % (commit, filename)
-        ret, file_content = run_command(git_show_command, path)
+        git_show_command = "git show %s:%s" % (commit, posixpath.join(*relative_path.split(os.path.sep), filename))
+        ret, file_content = run_command(git_show_command, root_path)
 
         # Does the file exist ?
         if ret:
@@ -128,15 +130,15 @@ class Git(RCS):
 class SVN(RCS):
     """ SVN Revision Control System class """
 
-    def show_file(self, path, commit, filename):
+    def show_file(self, root_path, commit, relative_path, filename):
 
         # Use current working copy
         if commit is None:
-            return super(SVN, self).show_file(path, commit, filename) 
-        
+            return super(SVN, self).show_file(root_path, commit, relative_path, filename)
+
         # Execute 'svn cat' command and return content or empty string
-        svn_cat_command = "svn cat -r %s %s" % (commit, filename)
-        ret, file_content = run_command(svn_cat_command, path)
+        svn_cat_command = "svn cat -r %s %s" % (commit, os.path.join(relative_path, filename))
+        ret, file_content = run_command(svn_cat_command, root_path)
 
         # Does the file exist ?
         if ret:
