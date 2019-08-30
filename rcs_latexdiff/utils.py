@@ -43,12 +43,13 @@ def write_file(content, filename):
     """
     logger.debug("Writing content into %s" % filename)
     if sys.version_info[0] > 2:
-        pass
+        with open(filename, 'w', encoding="utf-8") as f:
+            f.write(content)
     else:
         if isinstance(content, unicode):
             content = content.encode("utf-8")
-    with open(filename, 'w') as f:
-        f.write(content)
+        with open(filename, 'w') as f:
+            f.write(content)
 
 def remove_latex_comments(content):
     # If a line contains only a comment, remove the line completely
